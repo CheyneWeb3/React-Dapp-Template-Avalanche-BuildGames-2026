@@ -1,3 +1,4 @@
+// src/pages/HomePage.tsx
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Alert,
@@ -8,6 +9,7 @@ import {
   CircularProgress,
   Container,
   Divider,
+  Link,
   Stack,
   Typography
 } from '@mui/material'
@@ -114,7 +116,6 @@ export default function HomePage() {
     if (!walletProvider) return
     try {
       await trySwitchChain(walletProvider as any, desiredChainId)
-      // provider emits chainChanged; but we also refresh
       await refreshBalances()
     } catch (e: any) {
       setError(e?.message || 'Failed to switch network')
@@ -126,106 +127,141 @@ export default function HomePage() {
     refreshBalances()
   }, [refreshBalances])
 
-  return (
-    <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', py: 6 }}>
-      <Container maxWidth="sm">
-        <Stack spacing={2.25}>
-          <Stack spacing={0.5}>
-            <Typography variant="overline" sx={{ opacity: 0.85 }}>
-              Boilerplate by Cheyne • InHaus Devs
-            </Typography>
-            <Typography variant="h4" fontWeight={900}>
-              {APP_NAME}
-            </Typography>
-            <Typography variant="body1" color="text.secondary">
-              Default network: <b>{CHAINS[DEFAULT_CHAIN_ID].name}</b>. Connect a wallet to view native AVAX + WAVAX.
-            </Typography>
-          </Stack>
+  const coreUrl = 'https://core.app/'
 
-          <Card elevation={0}>
-            <CardContent>
-              <Stack spacing={2}>
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ sm: 'center' }}>
-                  {!isConnected ? (
-                    <Button
-                      variant="contained"
-                      size="large"
-                      onClick={() => open({ view: 'Connect', namespace: 'eip155' })}
+  return (
+    <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {/* Main content */}
+      <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', py: 6 }}>
+        <Container maxWidth="sm">
+          <Stack spacing={2.25}>
+            <Stack spacing={0.5}>
+              <Typography variant="overline" sx={{ opacity: 0.85 }}>
+                Boilerplate by Cheyne • InHaus Devs
+              </Typography>
+              <Typography variant="h4" fontWeight={900}>
+                {APP_NAME}
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                Default network: <b>{CHAINS[DEFAULT_CHAIN_ID].name}</b>. Connect a wallet to view native AVAX + WAVAX.
+              </Typography>
+            </Stack>
+
+            <Card elevation={0}>
+              <CardContent>
+                <Stack spacing={2}>
+                  <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} alignItems={{ sm: 'center' }}>
+                    {!isConnected ? (
+                      <Button
+                        variant="contained"
+                        size="large"
+                        onClick={() => open({ view: 'Connect', namespace: 'eip155' })}
+                      >
+                        Connect Wallet
+                      </Button>
+                    ) : (
+                      <>
+                        <Button variant="outlined" onClick={() => open({ view: 'Account' })}>
+                          {shortAddr(address)}
+                        </Button>
+                        <Button color="inherit" onClick={() => disconnect()}>
+                          Disconnect
+                        </Button>
+                      </>
+                    )}
+
+                    <Box sx={{ flex: 1 }} />
+
+                    <Typography variant="body2" color="text.secondary">
+                      Status: {status}
+                    </Typography>
+                  </Stack>
+
+                  <Divider />
+
+                  {error && <Alert severity="error">{error}</Alert>}
+
+                  {wrongNetwork && (
+                    <Alert
+                      severity="warning"
+                      action={
+                        <Button color="inherit" size="small" onClick={switchToDefault}>
+                          Switch
+                        </Button>
+                      }
                     >
-                      Connect Wallet
-                    </Button>
-                  ) : (
-                    <>
-                      <Button variant="outlined" onClick={() => open({ view: 'Account' })}>
-                        {shortAddr(address)}
-                      </Button>
-                      <Button color="inherit" onClick={() => disconnect()}>
-                        Disconnect
-                      </Button>
-                    </>
+                      You are on <b>{chainId}</b>. This app defaults to <b>{CHAINS[desiredChainId].name}</b>.
+                    </Alert>
                   )}
 
-                  <Box sx={{ flex: 1 }} />
-
-                  <Typography variant="body2" color="text.secondary">
-                    Status: {status}
-                  </Typography>
-                </Stack>
-
-                <Divider />
-
-                {error && <Alert severity="error">{error}</Alert>}
-
-                {wrongNetwork && (
-                  <Alert
-                    severity="warning"
-                    action={
-                      <Button color="inherit" size="small" onClick={switchToDefault}>
-                        Switch
-                      </Button>
-                    }
-                  >
-                    You are on <b>{chainId}</b>. This app defaults to <b>{CHAINS[desiredChainId].name}</b>.
-                  </Alert>
-                )}
-
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <Button variant="contained" disabled={!isConnected || loading} onClick={refreshBalances}>
-                    Refresh
-                  </Button>
-                  {loading && <CircularProgress size={20} />}
-                  <Box sx={{ flex: 1 }} />
-                  <Typography variant="body2" color="text.secondary">
-                    Chain: {chainId ?? '—'}
-                  </Typography>
-                </Stack>
-
-                <Stack spacing={1}>
-                  <Typography variant="h6">Balances</Typography>
-
-                  <Stack direction="row" justifyContent="space-between">
-                    <Typography color="text.secondary">Native (AVAX)</Typography>
-                    <Typography fontFamily="monospace">{native ? `${native} AVAX` : '—'}</Typography>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <Button variant="contained" disabled={!isConnected || loading} onClick={refreshBalances}>
+                      Refresh
+                    </Button>
+                    {loading && <CircularProgress size={20} />}
+                    <Box sx={{ flex: 1 }} />
+                    <Typography variant="body2" color="text.secondary">
+                      Chain: {chainId ?? '—'}
+                    </Typography>
                   </Stack>
 
-                  <Stack direction="row" justifyContent="space-between">
-                    <Typography color="text.secondary">Wrapped</Typography>
-                    <Typography fontFamily="monospace">{wavax ? `${wavax} ${wavaxSymbol}` : '—'}</Typography>
+                  <Stack spacing={1}>
+                    <Typography variant="h6">Balances</Typography>
+
+                    <Stack direction="row" justifyContent="space-between">
+                      <Typography color="text.secondary">Native (AVAX)</Typography>
+                      <Typography fontFamily="monospace">{native ? `${native} AVAX` : '—'}</Typography>
+                    </Stack>
+
+                    <Stack direction="row" justifyContent="space-between">
+                      <Typography color="text.secondary">Wrapped</Typography>
+                      <Typography fontFamily="monospace">{wavax ? `${wavax} ${wavaxSymbol}` : '—'}</Typography>
+                    </Stack>
                   </Stack>
+
+                  <Typography variant="caption" color="text.secondary">
+                    WAVAX contract: {wavaxAddress || '—'}
+                  </Typography>
                 </Stack>
+              </CardContent>
+            </Card>
 
-                <Typography variant="caption" color="text.secondary">
-                  WAVAX contract: {wavaxAddress || '—'}
-                </Typography>
-              </Stack>
-            </CardContent>
-          </Card>
+          </Stack>
+        </Container>
+      </Box>
 
-          <Typography variant="caption" color="text.secondary">
-            Tip: set <code>VITE_REOWN_PROJECT_ID</code> in <code>.env</code> (copy from <code>.env.example</code>).
-          </Typography>
-        </Stack>
-      </Container>
+      {/* Footer */}
+      <Box
+        component="footer"
+        sx={{
+          borderTop: '1px solid',
+          borderColor: 'divider',
+          py: 2,
+          backdropFilter: 'blur(6px)'
+        }}
+      >
+        <Container maxWidth="sm">
+          <Stack
+            direction={{ xs: 'column', sm: 'row' }}
+            spacing={1}
+            alignItems={{ xs: 'flex-start', sm: 'center' }}
+            justifyContent="space-between"
+          >
+            <Typography variant="caption" color="text.secondary">
+              © {new Date().getFullYear()} InHaus Devs • Built for Avalanche Build-Games
+            </Typography>
+
+            <Stack direction="row" spacing={1.5} alignItems="center">
+              <Typography variant="caption" color="text.secondary">
+                Works great with
+              </Typography>
+              <Link href={coreUrl} target="_blank" rel="noreferrer" underline="hover" sx={{ fontWeight: 700 }}>
+                Core Wallet
+              </Link>
+            </Stack>
+          </Stack>
+        </Container>
+      </Box>
     </Box>
   )
 }
