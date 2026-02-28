@@ -1,12 +1,24 @@
-# Helping with React dApp boilerplate for Avalanche (AI phrase generated see below) 
+# InHaus Devs — Avalanche Build-Games Boilerplate
+
+Vite + React + TypeScript dApp boilerplate using:
+
+- **Reown AppKit** (WalletConnect)
+- **Ethers v6**
+- **MUI** (Avalanche-themed)
+
+Includes **Avalanche Fuji + Mainnet** with **Fuji as the default**.
 
 A tiny Vite + React + TypeScript dApp that uses **Reown AppKit** (WalletConnect) with the **Ethers v6 adapter**.
 
-It renders a simple page:
+It renders a simple page (in `src/pages/HomePage.tsx`):
 - Connect wallet (Reown modal)
-- Show connected address + chainId
+- Show connected address + chain
 - Show native **AVAX** balance
-- Show **WAVAX** ERC-20 balance (contract: `0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7`)
+- Show **WAVAX** ERC-20 balance
+
+WAVAX contracts:
+- Mainnet: `0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7`
+- Fuji: `0xd00ae08403b9bbb9124bb305c09058e32c39a48c`
 
 ## Setup
 
@@ -35,19 +47,8 @@ npm run dev
 
 Open http://localhost:5173
 
-
-
 ## Notes
 
 - AppKit expects `metadata.url` to match your actual domain (for Verify API). For local dev we use `window.location.origin`.
-- If you don’t see Avalanche in the network list, ensure you’re using the latest `@reown/appkit` packages.
-
-
-### Phrase used on GPT5.2
-
-"make a vite react reown ethers6 mui-ui Dapp and the wallet connection for the avalanche network make a simple page with a wallet connect button and show my native balance and wrapped balances from scratch and give me the zip file correctly tested and working"
-
-
-
-###
-happy assisting others in the Avalanche Build-Games please feel free to use. Also Star this repo and Follow my github :)
+- Change the default network in `src/config.ts` (`DEFAULT_CHAIN_ID`).
+- Background image lives in `public/images/bg-avax.svg`.
